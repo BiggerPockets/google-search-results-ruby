@@ -33,6 +33,7 @@ class SerpApiSearch
   # @param [Hash] params contains requested parameter
   # @param [String] engine google|baidu|google|bing|ebay|yandex (optional or can be set in params)
   def initialize(params, engine = nil)
+    @timeout = params.delete(:timeout) || 600
     @params = params
     @params[:engine] ||= engine
     raise SerpApiException.new('engine must be defined in params or a second argument') if @params[:engine].nil?
@@ -132,7 +133,7 @@ class SerpApiSearch
   def get_results(path)
     begin
       url = construct_url(path)
-      URI(url).open(read_timeout: 600).read
+      URI(url).open(read_timeout: @timeout).read
     rescue OpenURI::HTTPError => e
       if error = JSON.load(e.io.read)["error"]
         puts "server returns error for url: #{url}"
